@@ -8,6 +8,7 @@ import CreatePokemonPage from "../components/CreatePokemonPage";
 
 const Pokemon = props => {
     const {id} = useParams();
+    const {games} = props;
     const [pokemon, setPokemon] = useState();
 
     useEffect(() => {
@@ -23,7 +24,7 @@ const Pokemon = props => {
     return (
         <>
             {pokemon === undefined && <CircularProgress/>}
-            {pokemon !== undefined && pokemon && <CreatePokemonPage pokemon = {pokemon}/>}
+            {pokemon !== undefined && pokemon && <CreatePokemonPage pokemon = {pokemon} games = {games}/>}
             {pokemon === false && <Typography>Pokemon not found</Typography>}
         </>
     )

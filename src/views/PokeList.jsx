@@ -11,17 +11,10 @@ import {
     TextField
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import {cyan} from "@mui/material/colors";
 import Search from "@mui/icons-material/Search"
 import { useHistory } from "react-router-dom";
 import axios from "axios";
-
-
-const importAll = (r) => {
-    let images = {};
-    r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
-    return images;
-}
-const gen1 = importAll(require.context('../../node_modules/pokemon-sprites/sprites/pokemon/versions/generation-ii/crystal/transparent', false, /\.(png|jpe?g|svg)$/));
 
 const useStyles = makeStyles(theme => ({
     listContainer: {
@@ -49,6 +42,11 @@ const useStyles = makeStyles(theme => ({
     textfield: {
         width: "200px",
         margin: "5px",
+    },
+    navBar: {
+        backgroundColor: "#222222",
+        display: "flex",
+        justifyContent: "space-between"
     }
 }));
 
@@ -58,22 +56,53 @@ const capitalize = (string) =>
 const PokeList = props => {
     const [pokemon, setPokemon] = useState();
     const [search, setSearch] = useState("");
+    const { games } = props;
     const classes = useStyles();
     const history = useHistory();
+
+    const swapSprites = (i) =>{
+        if(games === "crystal"){
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/crystal/transparent/${i+1}.png`
+        }
+        if(games === "emerald"){
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/emerald/${i+1}.png`
+        }
+        if(games === "dpp"){
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iv/platinum/${i+1}.png`
+        }
+        if(games === "bw"){
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${i+1}.gif`
+        }
+    }
+
+    const swapGet = () => {
+        if(games === "crystal"){
+            return `https://pokeapi.co/api/v2/pokemon?limit=251`
+        }
+        if(games === "emerald"){
+            return `https://pokeapi.co/api/v2/pokemon?limit=386`
+        }
+        if(games === "dpp"){
+            return `https://pokeapi.co/api/v2/pokemon?limit=493`
+        }
+        if(games === "bw"){
+            return `https://pokeapi.co/api/v2/pokemon?limit=649`
+        }
+    }
 
     const handleSearch = e => {
         setSearch(e.target.value);
     }
 
     useEffect(() => {
-        axios.get(`https://pokeapi.co/api/v2/pokemon?limit=251`)
+        axios.get(swapGet())
             .then(res => {
                 const newData = {};
                 res.data['results'].forEach((pokemon, i) => {
                     newData[i + 1] = {
                         id: i + 1,
                         name: pokemon.name,
-                        sprite: gen1[`${i + 1}.png`]
+                        sprite: swapSprites(i)
                     };
                 });
                 setPokemon(newData);
@@ -104,15 +133,19 @@ const PokeList = props => {
     return (
         <>
             <AppBar position="static">
-                <Toolbar>
+                <Toolbar className={classes.navBar}>
                     <div className={classes.search}>
                         <Search className={classes.icon} />
                         <TextField className={classes.textfield}
                             label="Pokemon"
-                            variant="standard"
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            focused
                             onChange={handleSearch}
                         />
                     </div>
+                    <button onClick={e=> history.push("/")}>Select new generation</button>
                 </Toolbar>
             </AppBar>
             {pokemon ? (
